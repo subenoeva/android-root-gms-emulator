@@ -84,6 +84,7 @@ Write-Host 'Shared functions' -ForegroundColor Cyan
 $commonPath = Join-Path $repositoryRoot 'scripts\Common.ps1'
 Assert-True -Condition (Test-Path -LiteralPath $commonPath -PathType Leaf) -Message 'Missing scripts/Common.ps1'
 if (Test-Path -LiteralPath $commonPath -PathType Leaf) {
+    Assert-FileContains -RelativePath 'scripts/Common.ps1' -LiteralText "Join-Path `$PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1'"
     . $commonPath
 
     $loadedConfig = Get-ToolkitConfig -RepositoryRoot $repositoryRoot
@@ -101,6 +102,14 @@ if (Test-Path -LiteralPath $commonPath -PathType Leaf) {
     } finally {
         Remove-Item -LiteralPath $hashFile -Force -ErrorAction SilentlyContinue
     }
+
+    $fakeAdb = Join-Path $repositoryRoot 'tests\fixtures\Fake-Adb.ps1'
+    try {
+        $resolvedSerial = Get-AvdSerial -AdbPath $fakeAdb -AvdName 'Root_GMS_API_36'
+        Assert-Equal -Actual $resolvedSerial -Expected 'emulator-5554' -Message 'Get-AvdSerial did not resolve the named AVD'
+    } catch {
+        Add-Failure -Message "Get-AvdSerial failed: $($_.Exception.Message)"
+    }
 }
 
 Write-Host 'AVD preparation and Magisk patching' -ForegroundColor Cyan
@@ -112,6 +121,18 @@ Assert-FileContains -RelativePath 'scripts/Patch-Magisk.ps1' -LiteralText 'elsei
 Assert-FileContains -RelativePath 'scripts/Restore-OriginalRamdisk.ps1' -LiteralText 'SupportsShouldProcess'
 Assert-FileContains -RelativePath 'scripts/Setup.ps1' -LiteralText 'Prepare-Avd.ps1'
 Assert-FileContains -RelativePath 'Setup.cmd' -LiteralText 'scripts\Setup.ps1'
+
+Write-Host 'SU bridge, cold boot, and runtime verification' -ForegroundColor Cyan
+Assert-FileContains -RelativePath 'assets/magisk-module/module.prop' -LiteralText 'id=avd_magisk_su_bridge'
+Assert-FileContains -RelativePath 'assets/magisk-module/system/system_ext/bin/su' -LiteralText 'exec /debug_ramdisk/su "$@"'
+Assert-FileContains -RelativePath '.gitattributes' -LiteralText 'assets/magisk-module/system/system_ext/bin/su text eol=lf'
+Assert-FileContains -RelativePath 'scripts/Install-SuBridge.ps1' -LiteralText 'MagiskModuleId'
+Assert-FileContains -RelativePath 'scripts/Launch-Cold-Boot.ps1' -LiteralText '-no-snapshot-load'
+Assert-FileContains -RelativePath 'scripts/Launch-Cold-Boot.ps1' -LiteralText '-no-snapshot-save'
+Assert-FileContains -RelativePath 'scripts/Launch-Cold-Boot.ps1' -LiteralText 'Wait-ForAvdSerial'
+Assert-FileContains -RelativePath 'Launch-Cold-Boot.cmd' -LiteralText 'scripts\Launch-Cold-Boot.ps1'
+Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'GooglePlayServicesPackage'
+Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'GoogleServicesFrameworkPackage'
 
 if ($script:Failures.Count -gt 0) {
     Write-Host "$($script:Failures.Count) test(s) failed." -ForegroundColor Red

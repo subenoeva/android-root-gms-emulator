@@ -1,5 +1,11 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$utilityModule = Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1'
+if (Test-Path -LiteralPath $utilityModule -PathType Leaf) {
+    Import-Module $utilityModule -Force -ErrorAction Stop
+} else {
+    Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
+}
 
 function Get-ToolkitConfig {
     [CmdletBinding()]
@@ -107,7 +113,7 @@ function Get-AvdSerial {
         [Parameter(Mandatory = $true)][string]$AvdName
     )
 
-    $matches = New-Object System.Collections.Generic.List[string]
+    $matchingSerials = New-Object System.Collections.Generic.List[string]
     $deviceLines = & $AdbPath devices
     foreach ($line in $deviceLines) {
         if ($line -notmatch '^(emulator-\d+)\s+device$') { continue }
@@ -116,10 +122,10 @@ function Get-AvdSerial {
             ForEach-Object { $_.Trim() } |
             Where-Object { $_ -and $_ -ne 'OK' } |
             Select-Object -First 1
-        if ($reportedName -eq $AvdName) { $matches.Add($serial) }
+        if ($reportedName -eq $AvdName) { $matchingSerials.Add($serial) }
     }
-    if ($matches.Count -gt 1) { throw "More than one running emulator reports AVD name '$AvdName'." }
-    if ($matches.Count -eq 1) { return $matches[0] }
+    if ($matchingSerials.Count -gt 1) { throw "More than one running emulator reports AVD name '$AvdName'." }
+    if ($matchingSerials.Count -eq 1) { return $matchingSerials[0] }
     $null
 }
 

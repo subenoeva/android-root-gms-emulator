@@ -1,0 +1,6 @@
+id=avd_magisk_su_bridge
+name=AVD Magisk SU Bridge
+version=1.0
+versionCode=1
+author=Pablo
+description=Expose MagiskSU before the built-in AOSP shell-only su binary.

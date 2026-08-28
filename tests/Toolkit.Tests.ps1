@@ -137,6 +137,8 @@ Assert-FileContains -RelativePath 'scripts/Launch-Cold-Boot.ps1' -LiteralText 'W
 Assert-FileContains -RelativePath 'Launch-Cold-Boot.cmd' -LiteralText 'scripts\Launch-Cold-Boot.ps1'
 Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'GooglePlayServicesPackage'
 Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'GoogleServicesFrameworkPackage'
+Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText '$attempt -le 10'
+Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'Start-Sleep -Seconds 2'
 
 Write-Host 'App-level root probe and documentation' -ForegroundColor Cyan
 Assert-FileContains -RelativePath 'tests/root-probe/AndroidManifest.xml' -LiteralText 'package="com.example.rootprobe"'

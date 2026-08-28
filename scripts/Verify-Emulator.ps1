@@ -49,15 +49,15 @@ $gsfPath = Invoke-AdbText -Arguments @('shell', 'pm', 'path', $config.GoogleServ
 if (-not $gsfPath.StartsWith('package:')) { throw 'Google Services Framework APK was not found.' }
 
 $networkOk = $false
-for ($attempt = 1; $attempt -le 3; $attempt++) {
+for ($attempt = 1; $attempt -le 10; $attempt++) {
     & $adb -s $serial shell ping -c 1 -W 3 google.com *> $null
     if ($LASTEXITCODE -eq 0) {
         $networkOk = $true
         break
     }
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 2
 }
-if (-not $networkOk) { throw 'Network verification failed after three attempts.' }
+if (-not $networkOk) { throw 'Network verification failed after ten attempts.' }
 
 Write-Host 'Runtime verification passed.' -ForegroundColor Green
 Write-Host "AVD:      $reportedName ($serial)"

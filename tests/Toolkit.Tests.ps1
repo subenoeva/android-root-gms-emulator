@@ -103,6 +103,16 @@ if (Test-Path -LiteralPath $commonPath -PathType Leaf) {
     }
 }
 
+Write-Host 'AVD preparation and Magisk patching' -ForegroundColor Cyan
+Assert-FileContains -RelativePath 'scripts/Prepare-Avd.ps1' -LiteralText '[switch]$CheckOnly'
+Assert-FileContains -RelativePath 'scripts/Prepare-Avd.ps1' -LiteralText 'CustomTag'
+Assert-FileContains -RelativePath 'scripts/Patch-Magisk.ps1' -LiteralText 'MagiskSha256'
+Assert-FileContains -RelativePath 'scripts/Patch-Magisk.ps1' -LiteralText 'ramdisk.img.backup'
+Assert-FileContains -RelativePath 'scripts/Patch-Magisk.ps1' -LiteralText 'elseif ($scriptContent.Contains($newPrompt)'
+Assert-FileContains -RelativePath 'scripts/Restore-OriginalRamdisk.ps1' -LiteralText 'SupportsShouldProcess'
+Assert-FileContains -RelativePath 'scripts/Setup.ps1' -LiteralText 'Prepare-Avd.ps1'
+Assert-FileContains -RelativePath 'Setup.cmd' -LiteralText 'scripts\Setup.ps1'
+
 if ($script:Failures.Count -gt 0) {
     Write-Host "$($script:Failures.Count) test(s) failed." -ForegroundColor Red
     exit 1

@@ -1,0 +1,29 @@
+# Downloaded dependencies and caches
+.cache/
+downloads/
+
+# Generated Android build artifacts
+artifacts/
+build/
+out/
+*.apk
+*.apks
+*.aab
+*.class
+*.dex
+*.zip
+*.jks
+*.keystore
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+Thumbs.db
+Desktop.ini
+
+# IDE metadata
+.idea/
+.vscode/
+*.iml

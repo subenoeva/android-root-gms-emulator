@@ -40,12 +40,8 @@
 ```powershell
 $requiredFiles = @(
     'config.psd1',
-    'scripts/Common.ps1',
-    'scripts/Prepare-Avd.ps1',
-    'scripts/Patch-Magisk.ps1',
-    'scripts/Install-SuBridge.ps1',
-    'scripts/Launch-Cold-Boot.ps1',
-    'scripts/Verify-Emulator.ps1'
+    '.gitignore',
+    'LICENSE'
 )
 foreach ($file in $requiredFiles) {
     Assert-True (Test-Path -LiteralPath (Join-Path $repositoryRoot $file)) "Missing $file"
@@ -56,7 +52,7 @@ foreach ($file in $requiredFiles) {
 
 Run: `powershell -NoProfile -ExecutionPolicy Bypass -File tests/Toolkit.Tests.ps1`
 
-Expected: non-zero exit with `Missing config.psd1` and missing scripts.
+Expected: non-zero exit with `Missing config.psd1`, `.gitignore`, and `LICENSE`.
 
 - [ ] **Step 3: Add configuration, ignore rules, and license**
 
@@ -76,11 +72,11 @@ Expected: non-zero exit with `Missing config.psd1` and missing scripts.
 }
 ```
 
-- [ ] **Step 4: Run the test and verify that only not-yet-created scripts fail**
+- [ ] **Step 4: Run the test and verify GREEN**
 
 Run: `powershell -NoProfile -ExecutionPolicy Bypass -File tests/Toolkit.Tests.ps1`
 
-Expected: configuration assertions pass; missing script assertions remain RED.
+Expected: configuration and repository-contract assertions pass with exit code 0.
 
 - [ ] **Step 5: Commit the repository foundation**
 

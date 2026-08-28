@@ -80,6 +80,29 @@ if (Test-Path -LiteralPath $configPath -PathType Leaf) {
     Assert-Equal -Actual $config.RootAvdCommit -Expected '92df40eafa2f117053f56015e3c32ca706a55fa9' -Message 'Unexpected rootAVD commit'
 }
 
+Write-Host 'Shared functions' -ForegroundColor Cyan
+$commonPath = Join-Path $repositoryRoot 'scripts\Common.ps1'
+Assert-True -Condition (Test-Path -LiteralPath $commonPath -PathType Leaf) -Message 'Missing scripts/Common.ps1'
+if (Test-Path -LiteralPath $commonPath -PathType Leaf) {
+    . $commonPath
+
+    $loadedConfig = Get-ToolkitConfig -RepositoryRoot $repositoryRoot
+    Assert-Equal -Actual $loadedConfig.AvdName -Expected 'Root_GMS_API_36' -Message 'Get-ToolkitConfig returned the wrong AVD'
+
+    $basePath = Join-Path ([System.IO.Path]::GetTempPath()) 'android-root-toolkit-tests'
+    $insidePath = Resolve-ContainedPath -BasePath $basePath -ChildPath 'cache\file.zip'
+    Assert-True -Condition $insidePath.StartsWith([System.IO.Path]::GetFullPath($basePath), [System.StringComparison]::OrdinalIgnoreCase) -Message 'Contained path was rejected'
+    Assert-Throws -Action { Resolve-ContainedPath -BasePath $basePath -ChildPath '..\outside.txt' | Out-Null } -Message 'Escaping path was accepted'
+
+    $hashFile = Join-Path ([System.IO.Path]::GetTempPath()) 'android-root-toolkit-hash.txt'
+    [System.IO.File]::WriteAllText($hashFile, 'abc', (New-Object System.Text.UTF8Encoding($false)))
+    try {
+        Assert-Equal -Actual (Get-Sha256 -Path $hashFile) -Expected 'BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD' -Message 'Unexpected SHA-256'
+    } finally {
+        Remove-Item -LiteralPath $hashFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
 if ($script:Failures.Count -gt 0) {
     Write-Host "$($script:Failures.Count) test(s) failed." -ForegroundColor Red
     exit 1

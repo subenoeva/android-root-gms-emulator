@@ -8,6 +8,7 @@
     DataPartitionSize = '10G'
     RamSize = '2G'
     MinimumFreeSpaceGb = 12
+    BuildToolsVersion = '36.0.0'
 
     MagiskVersion = '30.7'
     MagiskUrl = 'https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk'

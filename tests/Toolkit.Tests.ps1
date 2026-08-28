@@ -76,6 +76,10 @@ if (Test-Path -LiteralPath $configPath -PathType Leaf) {
     Assert-Equal -Actual $config.SourceTag -Expected 'google_apis' -Message 'Unexpected source tag'
     Assert-Equal -Actual $config.CustomTag -Expected 'google_apis_magisk' -Message 'Unexpected custom tag'
     Assert-Equal -Actual $config.MagiskVersion -Expected '30.7' -Message 'Unexpected Magisk version'
+    Assert-True -Condition $config.ContainsKey('BuildToolsVersion') -Message 'Missing BuildToolsVersion configuration'
+    if ($config.ContainsKey('BuildToolsVersion')) {
+        Assert-Equal -Actual $config.BuildToolsVersion -Expected '36.0.0' -Message 'Unexpected Build Tools version'
+    }
     Assert-Equal -Actual $config.MagiskSha256 -Expected 'E0D32D2123532860F97123D927B1BB86C4E08E6FD8A48BFC6B5BEE0AFAE9EBD5' -Message 'Unexpected Magisk hash'
     Assert-Equal -Actual $config.RootAvdCommit -Expected '92df40eafa2f117053f56015e3c32ca706a55fa9' -Message 'Unexpected rootAVD commit'
 }
@@ -133,6 +137,19 @@ Assert-FileContains -RelativePath 'scripts/Launch-Cold-Boot.ps1' -LiteralText 'W
 Assert-FileContains -RelativePath 'Launch-Cold-Boot.cmd' -LiteralText 'scripts\Launch-Cold-Boot.ps1'
 Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'GooglePlayServicesPackage'
 Assert-FileContains -RelativePath 'scripts/Verify-Emulator.ps1' -LiteralText 'GoogleServicesFrameworkPackage'
+
+Write-Host 'App-level root probe and documentation' -ForegroundColor Cyan
+Assert-FileContains -RelativePath 'tests/root-probe/AndroidManifest.xml' -LiteralText 'package="com.example.rootprobe"'
+Assert-FileContains -RelativePath 'tests/root-probe/RootProbeActivity.java' -LiteralText 'new ProcessBuilder("su", "-c", "id")'
+Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText 'RootProbePackage'
+Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText 'BuildToolsVersion'
+Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText "'--release', '17'"
+Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText "'(?:userId|appId)=(\d+)'"
+Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText 'Magisk > Superuser'
+Assert-FileContains -RelativePath 'scripts/Verify-Toolkit.ps1' -LiteralText 'Toolkit.Tests.ps1'
+Assert-FileContains -RelativePath 'README.md' -LiteralText 'Instalación desde cero'
+Assert-FileContains -RelativePath 'README.md' -LiteralText 'Launch-Cold-Boot.cmd'
+Assert-FileContains -RelativePath 'docs/troubleshooting.md' -LiteralText 'Permission denied'
 
 if ($script:Failures.Count -gt 0) {
     Write-Host "$($script:Failures.Count) test(s) failed." -ForegroundColor Red

@@ -25,6 +25,8 @@ $adb = Get-SdkToolPath -SdkPath $sdkRoot -ToolName 'adb.exe' -RelativeCandidates
 $emulator = Get-SdkToolPath -SdkPath $sdkRoot -ToolName 'emulator.exe' -RelativeCandidates @('emulator\emulator.exe')
 
 $sourcePackage = "system-images;android-$($config.ApiLevel);$($config.SourceTag);$($config.Abi)"
+$platformPackage = "platforms;android-$($config.ApiLevel)"
+$buildToolsPackage = "build-tools;$($config.BuildToolsVersion)"
 $sourceRelativePath = "system-images\android-$($config.ApiLevel)\$($config.SourceTag)\$($config.Abi)"
 $customRelativePath = "system-images\android-$($config.ApiLevel)\$($config.CustomTag)\$($config.Abi)"
 $sourceImageDirectory = Join-Path $sdkRoot $sourceRelativePath
@@ -61,6 +63,8 @@ Invoke-CheckedProcess -FilePath $sdkManager -ArgumentList @(
     '--install',
     'platform-tools',
     'emulator',
+    $platformPackage,
+    $buildToolsPackage,
     $sourcePackage
 ) | Out-Null
 

@@ -149,7 +149,7 @@ Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralT
 Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText "'(?:userId|appId)=(\d+)'"
 Assert-FileContains -RelativePath 'tests/root-probe/Build-And-Run.ps1' -LiteralText 'Magisk > Superuser'
 Assert-FileContains -RelativePath 'scripts/Verify-Toolkit.ps1' -LiteralText 'Toolkit.Tests.ps1'
-Assert-FileContains -RelativePath 'README.md' -LiteralText 'Instalación desde cero'
+Assert-FileContains -RelativePath 'README.md' -LiteralText 'Installation from scratch'
 Assert-FileContains -RelativePath 'README.md' -LiteralText 'Launch-Cold-Boot.cmd'
 Assert-FileContains -RelativePath 'docs/troubleshooting.md' -LiteralText 'Permission denied'
 

@@ -1,80 +1,80 @@
 # Android Root + GMS Emulator
 
-Toolkit reproducible para crear en Windows un Android Virtual Device con:
+A reproducible toolkit for creating an Android Virtual Device on Windows with:
 
 - Android 16 / API 36, x86_64.
-- Imagen Google APIs con Google Play Services y Google Services Framework.
-- Magisk 30.7 y root disponible para aplicaciones.
-- Cold boot en cada lanzamiento.
-- Imagen original de Google intacta y copia de seguridad de la ramdisk.
+- A Google APIs image with Google Play Services and Google Services Framework.
+- Magisk 30.7 and root access for applications.
+- A cold boot on every launch.
+- The original Google image left intact and a backup of the ramdisk.
 
-No se utiliza una imagen `google_apis_playstore`. Las imágenes con Play Store están firmadas para producción y no permiten privilegios elevados; la variante `google_apis` sí incluye los servicios de Google necesarios, pero no la aplicación Play Store.
+This toolkit does not use a `google_apis_playstore` image. Play Store images are signed for production and do not allow elevated privileges. The `google_apis` variant includes the required Google services, but not the Play Store application.
 
-## Qué queda fijado
+## Pinned configuration
 
-Los valores están centralizados en [`config.psd1`](config.psd1):
+All values are centralized in [`config.psd1`](config.psd1):
 
-| Componente | Valor |
+| Component | Value |
 |---|---|
 | AVD | `Root_GMS_API_36` |
 | Android | API 36 / x86_64 |
-| Perfil | Pixel 7 |
-| Imagen original | `google_apis` |
-| Copia parcheada | `google_apis_magisk` |
+| Device profile | Pixel 7 |
+| Original image | `google_apis` |
+| Patched copy | `google_apis_magisk` |
 | Magisk | 30.7 |
 | Android Build Tools | 36.0.0 |
 | rootAVD | commit `92df40eafa2f117053f56015e3c32ca706a55fa9` |
 
-El APK de Magisk solo se acepta si su SHA-256 es:
+The Magisk APK is accepted only when its SHA-256 is:
 
 ```text
 E0D32D2123532860F97123D927B1BB86C4E08E6FD8A48BFC6B5BEE0AFAE9EBD5
 ```
 
-## Requisitos
+## Requirements
 
-- Windows 10 u 11 de 64 bits con virtualización habilitada.
-- Android Studio o Android SDK Command-Line Tools.
-- Git for Windows, incluido Git Bash, requerido por `rootAVD.bat`.
-- JDK 17 o superior. Android Studio incluye un JDK compatible en `jbr`.
-- PowerShell 5.1 o superior.
-- Al menos 12 GB libres en la unidad del SDK.
-- Conexión a Internet durante la preparación.
+- 64-bit Windows 10 or 11 with virtualization enabled.
+- Android Studio or the Android SDK Command-Line Tools.
+- Git for Windows, including Git Bash, which is required by `rootAVD.bat`.
+- JDK 17 or newer. Android Studio includes a compatible JDK under `jbr`.
+- PowerShell 5.1 or newer.
+- At least 12 GB of free space on the SDK drive.
+- An Internet connection during setup.
 
-El SDK se busca en este orden:
+The SDK is located in this order:
 
-1. Parámetro `-SdkPath`.
+1. The `-SdkPath` parameter.
 2. `ANDROID_SDK_ROOT`.
 3. `ANDROID_HOME`.
 4. `%LOCALAPPDATA%\Android\Sdk`.
 
-## Instalación desde cero
+## Installation from scratch
 
-Abre PowerShell en la carpeta del repositorio.
+Open PowerShell in the repository directory.
 
-### 1. Comprobar el entorno
+### 1. Check the environment
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Prepare-Avd.ps1 -CheckOnly
 ```
 
-Este modo no cambia archivos. Debe localizar `sdkmanager`, `avdmanager`, ADB y el emulador.
+This mode does not modify any files. It must locate `sdkmanager`, `avdmanager`, ADB, and the emulator.
 
-### 2. Ejecutar la preparación completa
+### 2. Run the full setup
 
-Si las licencias del SDK ya se aceptaron desde Android Studio:
+If the SDK licenses have already been accepted through Android Studio:
 
 ```powershell
 .\Setup.cmd
 ```
 
-Para aceptar las licencias desde el script:
+To accept the licenses from the script:
 
 ```powershell
 .\Setup.cmd -AcceptLicenses
 ```
 
-La preparación instala o comprueba estos paquetes:
+The setup installs or checks the following packages:
 
 ```text
 platform-tools
@@ -84,184 +84,184 @@ build-tools;36.0.0
 system-images;android-36;google_apis;x86_64
 ```
 
-Después crea `Root_GMS_API_36` y copia la imagen del sistema:
+It then creates `Root_GMS_API_36` and copies the system image:
 
 ```text
 Original: system-images\android-36\google_apis\x86_64
-Copia:    system-images\android-36\google_apis_magisk\x86_64
+Copy:     system-images\android-36\google_apis_magisk\x86_64
 ```
 
-La imagen original no se modifica.
+The original image is not modified.
 
-Si ya existe un AVD o una copia aislada con esos nombres, el script se detiene. `-Force` no los borra: los mueve a rutas con sufijo `.pre-toolkit-AAAAmmdd-HHMMSS` antes de crear el entorno nuevo.
+If an AVD or isolated copy already exists with those names, the script stops. `-Force` does not delete them: it moves them to paths with a `.pre-toolkit-yyyyMMdd-HHmmss` suffix before creating the new environment.
 
-### 3. Parchear la ramdisk en Magisk
+### 3. Patch the ramdisk with Magisk
 
-`Setup.cmd` arranca el AVD original y ejecuta el commit fijado de rootAVD. Magisk se abrirá dentro del emulador.
+`Setup.cmd` launches the original AVD and runs the pinned rootAVD commit. Magisk opens inside the emulator.
 
-1. Si aparece la pantalla principal, pulsa `Install` junto a Magisk.
-2. Elige `Select and Patch a File`.
-3. Abre `Downloads` y selecciona `fakeboot.img`.
-4. Pulsa `LET'S GO`.
-5. Espera hasta ver `All done`.
-6. Vuelve a la terminal y pulsa Intro antes de que termine la espera de 300 segundos.
+1. If the Magisk home screen appears, select `Install` next to Magisk.
+2. Select `Select and Patch a File`.
+3. Open `Downloads` and select `fakeboot.img`.
+4. Select `LET'S GO`.
+5. Wait until `All done` appears.
+6. Return to the terminal and press Enter before the 300-second timeout expires.
 
-El script solo continúa si se cumplen las tres condiciones:
+The script continues only when all three conditions are met:
 
-- Existe `ramdisk.img.backup`.
-- Su hash coincide con la ramdisk anterior al parche.
-- El hash de la ramdisk activa ha cambiado.
+- `ramdisk.img.backup` exists.
+- Its hash matches the ramdisk from before the patch.
+- The active ramdisk hash has changed.
 
-Después cambia `image.sysdir.1` para que el AVD use la copia aislada.
+The script then changes `image.sysdir.1` so the AVD uses the isolated copy.
 
-### 4. Completar la instalación de Magisk
+### 4. Complete the Magisk installation
 
-El AVD se iniciará otra vez mediante cold boot y se abrirá Magisk.
+The AVD starts again with a cold boot and Magisk opens.
 
-1. Acepta `Requires additional setup`.
-2. Permite que Magisk reinicie el emulador.
-3. Espera a que la pantalla principal muestre `Installed 30.7`.
-4. Vuelve a la terminal y pulsa Intro.
+1. Accept `Requires additional setup`.
+2. Allow Magisk to restart the emulator.
+3. Wait until the home screen shows `Installed 30.7`.
+4. Return to the terminal and press Enter.
 
-### 5. Instalar el bridge de `su`
+### 5. Install the `su` bridge
 
-El setup ejecuta automáticamente:
+The setup automatically runs:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Install-SuBridge.ps1
 ```
 
-Si Magisk pregunta por acceso de superusuario para `Shell`, selecciona `Grant`.
+If Magisk asks for superuser access for `Shell`, select `Grant`.
 
-La imagen Google APIs contiene `/system/xbin/su`, pero ese binario está restringido a `root:shell` y puede ocultar MagiskSU a las aplicaciones. El módulo incluido monta `/system_ext/bin/su`, que delega en:
+The Google APIs image contains `/system/xbin/su`, but that binary is restricted to `root:shell` and can hide MagiskSU from applications. The included module mounts `/system_ext/bin/su`, which delegates to:
 
 ```sh
 /debug_ramdisk/su
 ```
 
-Tras el reinicio, `command -v su` debe devolver `/system_ext/bin/su`.
+After the restart, `command -v su` must return `/system_ext/bin/su`.
 
-## Verificación
+## Verification
 
-### Comprobar el repositorio
+### Verify the repository
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Verify-Toolkit.ps1
 ```
 
-Valida sintaxis, contratos, finales de línea del módulo, ausencia de binarios descargados en Git y limpieza de la autoría de los commits.
+This checks syntax, repository contracts, module line endings, the absence of downloaded binaries in Git, and clean commit attribution.
 
-### Comprobar el emulador
+### Verify the emulator
 
-Con el AVD iniciado:
+With the AVD running:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Verify-Emulator.ps1
 ```
 
-Comprueba:
+The script checks:
 
 - `sys.boot_completed=1`.
-- Nombre exacto del AVD.
+- The exact AVD name.
 - Magisk `30.7:MAGISK:R`.
 - MagiskSU `30.7:MAGISKSU`.
-- `su -c id` con `uid=0(root)` y contexto `u:r:magisk:s0`.
-- APK de Google Play Services.
-- APK de Google Services Framework.
-- Conectividad de red.
+- `su -c id` returns `uid=0(root)` with the `u:r:magisk:s0` context.
+- The Google Play Services APK.
+- The Google Services Framework APK.
+- Network connectivity.
 
-### Demostrar root desde una aplicación
+### Prove root access from an application
 
-La comprobación anterior usa el UID de `shell`. Para demostrar que una aplicación normal puede obtener root:
+The previous check uses the `shell` UID. To prove that a regular application can obtain root:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\root-probe\Build-And-Run.ps1
 ```
 
-El script compila y firma una APK temporal sin Gradle, la instala y abre. Concede la solicitud en Magisk. Si no aparece un diálogo, entra en `Magisk > Superuser`, habilita `Root Probe`, vuelve a abrir la sonda y pulsa Intro en la terminal. La prueba exige:
+The script builds and signs a temporary APK without Gradle, installs it, and opens it. Grant the request in Magisk. If no dialog appears, open `Magisk > Superuser`, enable `Root Probe`, reopen the probe, and press Enter in the terminal. The test requires:
 
 ```text
 exit=0
 uid=0(root)
 ```
 
-También comprueba que el paquete se ejecutaba con un UID Android de aplicación, igual o superior a 10000. Al terminar desinstala la APK y elimina sus artefactos. Usa `-KeepArtifacts` únicamente si necesitas inspeccionarlos.
+It also checks that the package was running under a normal Android application UID of 10000 or higher. When finished, it uninstalls the APK and removes its artifacts. Use `-KeepArtifacts` only when you need to inspect them.
 
-## Lanzamiento con cold boot
+## Launching with a cold boot
 
-Haz doble clic en:
+Double-click:
 
 ```text
 Launch-Cold-Boot.cmd
 ```
 
-O ejecútalo desde PowerShell:
+Or run it from PowerShell:
 
 ```powershell
 .\Launch-Cold-Boot.cmd
 ```
 
-El lanzador:
+The launcher:
 
-1. Detiene solo una instancia activa de `Root_GMS_API_36`.
-2. Ejecuta el emulador con `-no-snapshot-load -no-snapshot-save`.
-3. Resuelve el serial consultando el nombre del AVD, aunque haya un teléfono físico conectado.
-4. Espera el arranque completo.
-5. Habilita `adb root` sobre ese serial concreto.
-6. Verifica MagiskSU.
+1. Stops only an active `Root_GMS_API_36` instance.
+2. Runs the emulator with `-no-snapshot-load -no-snapshot-save`.
+3. Resolves the serial by querying the AVD name, even when a physical phone is connected.
+4. Waits for the boot to complete.
+5. Enables `adb root` for that exact serial.
+6. Verifies MagiskSU.
 
-No usa `adb -e`, por lo que no queda ambiguo cuando ADB detecta varios dispositivos.
+It does not use `adb -e`, so the target remains unambiguous when ADB detects multiple devices.
 
-## Restaurar la ramdisk original
+## Restoring the original ramdisk
 
-Cierra el AVD y ejecuta:
+Close the AVD and run:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Restore-OriginalRamdisk.ps1 -Confirm
 ```
 
-El script conserva primero otra copia de la ramdisk parcheada y luego restaura `ramdisk.img.backup`. Comprueba los hashes antes de terminar.
+The script first preserves another copy of the patched ramdisk and then restores `ramdisk.img.backup`. It verifies the hashes before completing.
 
-Esto elimina Magisk de la ramdisk aislada. No modifica la imagen original descargada por `sdkmanager`.
+This removes Magisk from the isolated ramdisk. It does not modify the original image downloaded by `sdkmanager`.
 
-## Actualizar Magisk o rootAVD
+## Updating Magisk or rootAVD
 
-No sustituyas archivos descargados manualmente dentro de `.cache`.
+Do not manually replace downloaded files inside `.cache`.
 
-1. Cambia versión, URL y hash en `config.psd1`.
-2. Cambia el commit y la URL fijada de rootAVD si procede.
-3. Revisa si el bloque de timeout de `rootAVD.sh` sigue siendo idéntico.
-4. Ejecuta las verificaciones estáticas.
-5. Prepara un AVD nuevo o restaura la ramdisk antes de volver a parchear.
-6. Usa `-RefreshDownloads` para reconstruir la caché:
+1. Update the version, URL, and hash in `config.psd1`.
+2. Update the pinned rootAVD commit and URL when required.
+3. Check whether the timeout block in `rootAVD.sh` is still identical.
+4. Run the static checks.
+5. Prepare a new AVD or restore the ramdisk before patching it again.
+6. Use `-RefreshDownloads` to rebuild the cache:
 
 ```powershell
 .\Setup.cmd -RefreshDownloads
 ```
 
-El script se detendrá si el hash de Magisk no coincide o si el código fijado de rootAVD ya no contiene el bloque revisado.
+The script stops if the Magisk hash does not match or if the pinned rootAVD source no longer contains the reviewed block.
 
-## Archivos principales
+## Main files
 
-| Archivo | Responsabilidad |
+| File | Responsibility |
 |---|---|
-| `config.psd1` | Versiones, nombres, URL y hashes |
-| `Setup.cmd` | Entrada para la instalación completa |
-| `scripts/Prepare-Avd.ps1` | SDK, AVD y copia aislada |
-| `scripts/Patch-Magisk.ps1` | Descarga verificada y parche rootAVD |
-| `scripts/Install-SuBridge.ps1` | Módulo que expone MagiskSU a aplicaciones |
-| `Launch-Cold-Boot.cmd` | Lanzamiento diario con cold boot |
-| `scripts/Verify-Emulator.ps1` | Verificación runtime |
-| `tests/root-probe/Build-And-Run.ps1` | Verificación desde UID de aplicación |
-| `scripts/Restore-OriginalRamdisk.ps1` | Recuperación reversible |
-| `docs/troubleshooting.md` | Diagnóstico de errores conocidos |
+| `config.psd1` | Versions, names, URLs, and hashes |
+| `Setup.cmd` | Entry point for the full installation |
+| `scripts/Prepare-Avd.ps1` | SDK, AVD, and isolated image copy |
+| `scripts/Patch-Magisk.ps1` | Verified download and rootAVD patch |
+| `scripts/Install-SuBridge.ps1` | Module that exposes MagiskSU to applications |
+| `Launch-Cold-Boot.cmd` | Daily cold-boot launcher |
+| `scripts/Verify-Emulator.ps1` | Runtime verification |
+| `tests/root-probe/Build-And-Run.ps1` | Verification from an application UID |
+| `scripts/Restore-OriginalRamdisk.ps1` | Reversible recovery |
+| `docs/troubleshooting.md` | Troubleshooting known failures |
 
-## Fuentes
+## Sources
 
-- [Crear y administrar AVD](https://developer.android.com/studio/run/managing-avds)
-- [Iniciar el emulador desde línea de comandos](https://developer.android.com/studio/run/emulator-commandline)
+- [Create and manage virtual devices](https://developer.android.com/studio/run/managing-avds)
+- [Start the emulator from the command line](https://developer.android.com/studio/run/emulator-commandline)
 - [avdmanager](https://developer.android.com/tools/avdmanager)
 - [Magisk](https://github.com/topjohnwu/Magisk)
 - [rootAVD](https://github.com/galihlasahido/rootAVD)
 
-Magisk y rootAVD conservan sus propias licencias y condiciones. Este repositorio no redistribuye sus artefactos ni las imágenes de Google.
+Magisk and rootAVD retain their own licenses and terms. This repository does not redistribute their artifacts or Google system images.
